@@ -21,18 +21,15 @@ import Network.Wai (Application)
 import Network.Wai.Handler.Warp
 import Servant.API
 import Servant.Server
+import Servant.Utils.StaticFiles
 import SimpleStore
 import Plowtech.Service.Types
-
--- | The proxy for the validation Servant API type
-onpingTagCombinedValidatorAPI :: Proxy OnpingTagCombinedValidatorAPI
-onpingTagCombinedValidatorAPI = Proxy
 
 -- | The WAI application serving the API
 onpingTagCombinedValidator :: SimpleStore [NamedJSON OnpingTagCombinedTemplateJSON] -> Application
 onpingTagCombinedValidator store = 
   serve onpingTagCombinedValidatorAPI
-        (getTemplates store :<|> postTemplate store :<|> getTemplate store :<|> validate store)
+        (getTemplates store :<|> postTemplate store :<|> getTemplate store :<|> validate store :<|> serveDirectory "static")
 
 storeMToServant :: StoreM '[] (Either StoreError a) -> EitherT ServantErr IO a
 storeMToServant = bimapEitherT storeErrorToServantError id . EitherT . runStoreM
