@@ -24,6 +24,7 @@ import Servant.Server
 import Servant.Utils.StaticFiles
 import SimpleStore
 import Plowtech.Service.Types
+import Control.Monad.IO.Class
 
 -- | The WAI application serving the API
 onpingTagCombinedValidator :: SimpleStore [NamedJSON OnpingTagCombinedTemplateJSON] -> Application
@@ -46,6 +47,8 @@ postTemplate :: SimpleStore [NamedJSON OnpingTagCombinedTemplateJSON] -> NamedJS
 postTemplate templateStore namedTemplateJSON = storeMToServant $ retryLock $ withWriteLock templateStore $ do 
   templates <- readSimpleStore StoreHere
   writeSimpleStore StoreHere $ namedTemplateJSON : templates
+  liftIO $ print $ toJSON namedTemplateJSON
+  checkpointSimpleStore StoreHere
   return ()
 
 getTemplate :: SimpleStore [NamedJSON OnpingTagCombinedTemplateJSON] -> Text -> EitherT ServantErr IO OnpingTagCombinedTemplateJSON 
