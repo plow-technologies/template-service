@@ -1,5 +1,12 @@
 $(function(){main();});
 
+// from jresig via stack overflow
+Array.prototype.remove = function(from, to) {
+  var rest = this.slice((to || from) + 1 || this.length);
+  this.length = from < 0 ? this.length + from : from;
+  return this.push.apply(this, rest);
+};
+
 function main() {
   getTemplates(function(templates){
     var editor = templateEditor();
@@ -98,7 +105,13 @@ function templateEditTable( template, key, editor ) {
         $.each(disjTemplate["And"], function(andIdx, conjTemplate) {
           matrix[orIdx][andIdx] = $("<td>"); 
           var constrSelector = constraintSelector(template, key, orIdx, andIdx, editor);
+          var subButton = $("<button type=\"button\">-</button>");
+          subButton.click(function() {
+            template.record[key]["Or"][orIdx]["And"].remove(andIdx);
+            postTemplate(template, editor.selector);
+          });
           matrix[orIdx][andIdx].append(constrSelector.element);
+          matrix[orIdx][andIdx].append(subButton);
         });
       } 
     });
@@ -122,8 +135,15 @@ function templateEditTable( template, key, editor ) {
       postTemplate( template, editor.selector );
     });
     andAddCell.append(andAddButton);
-    orRow.css("border-bottom: 1px dotted black");
+    var orSubButton = $("<button type=\"button\">- OR</button>");
+    orSubButton.click(function() {
+      template.record[key]["Or"].remove(orIdx);
+      postTemplate(template, editor.selector);
+    });
+    var orSubCell = $("<td>");
+    orSubCell.append(orSubButton);
     orRow.append(andAddCell);
+    orRow.append(orSubCell);
     templateEditTable.element.append(orRow);
   });
   var orAddRow = $("<tr>");
