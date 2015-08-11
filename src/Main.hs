@@ -58,13 +58,13 @@ getTemplate templateStore templateName = do
     Just template -> return $ template ^. (namedJSON . rlens (Proxy :: Proxy "record") . namedAttr)
     Nothing -> left err404
  
-validate :: SimpleStore [NamedJSON OnpingTagCombinedTemplateJSON] -> Text -> OnpingTagCombinedJSON -> EitherT ServantErr IO Bool
+validate :: SimpleStore [NamedJSON OnpingTagCombinedTemplateJSON] -> Text -> OnpingTagCombinedJSON -> EitherT ServantErr IO OnpingTagCombinedValidationJSON
 validate templateStore templateName candidate = do
   mTemplate <- storeMToServant $ withReadLock templateStore $ fmap (listToMaybe . filter ((templateName ==) . (^. (namedJSON . rlens (Proxy :: Proxy "name") . namedAttr)))) $ readSimpleStore StoreHere
   template <- case mTemplate of
     Just template -> return $ template ^. (namedJSON . rlens (Proxy :: Proxy "record") . namedAttr)
     Nothing -> left err404
-  return $ and $ recordToList $ checkTemplates (template ^. onpingTagCombinedTemplateJSON) (candidate ^. onpingTagCombinedJSON)
+  return $ checkTemplates (template ^. onpingTagCombinedTemplateJSON) (candidate ^. onpingTagCombinedJSON) ^. from onpingTagCombinedValidationJSON
   
 
 

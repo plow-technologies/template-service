@@ -44,6 +44,7 @@ function templateValidator() {
       templateForm[key] = {};
       templateForm[key].input = inputByType(templateTypes[key]);
       templateForm[key].statusButton = $("<button type=\"button\" disabled=\"true\">");
+      templateForm[key].statusButton.html("&nbsp;");
       var formDiv = $("<div>");
       formDiv.text(key + ": ");
       formDiv.append(templateForm[key].input.element);
@@ -62,9 +63,18 @@ function templateValidator() {
               "contentType": "application/json",
               "data": JSON.stringify(candidate),
               "success": function( data ) {
-                          if(data){ checkButton.css("background-color", "green");  }
-                          else { checkButton.css("background-color", "red"); }
-                        },
+                           var allValid = true;
+                           $.each(Object.keys(data), function( hucars, key) {
+                             if(data[key]){ templateForm[key].statusButton.css("background-color", "green");  }
+                             else { templateForm[key].statusButton.css("background-color", "red"); }
+                             allValid = allValid && data[key]
+                           });
+                           if(allValid) {
+                             checkButton.css("background-color", "green");
+                           } else {
+                             checkButton.css("background-color", "red"); 
+                           }
+                         },
               "dataType": "json"});
     });
     validator.element.append(checkButton);

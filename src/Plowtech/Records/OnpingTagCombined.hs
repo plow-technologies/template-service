@@ -8,15 +8,15 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Plowtech.Records.OnpingTagCombined where
 
-import Control.Applicative
-import Control.Lens hiding ((.=))
+import Control.Applicative hiding (Const(..))
+import Control.Lens hiding ((.=), Const(..))
 import Control.Lens.TH
 import Data.Aeson
 import Data.Master.Template
 import Data.Text (Text)
 import Data.Time.Clock (UTCTime)
 import Data.Vinyl
-import Data.Vinyl.Functor (Compose(..))
+import Data.Vinyl.Functor (Compose(..), Const(..))
 import GHC.TypeLits
 
 
@@ -35,6 +35,12 @@ instance (ToJSON (f (g x))) => ToJSON (Compose f g x) where
 
 instance (FromJSON (f (g x))) => FromJSON (Compose f g x) where
   parseJSON = (Compose <$>) . parseJSON
+
+instance (ToJSON a) => ToJSON (Const a b) where
+  toJSON (Const x) = toJSON x
+
+instance (FromJSON a) => FromJSON (Const a b) where
+  parseJSON = (Const <$>) . parseJSON
 
 type family OnpingTagCombinedField (field :: Symbol) where
   OnpingTagCombinedField "location_id"        = Maybe Int
@@ -96,6 +102,7 @@ type OnpingTagCombined = Rec OnpingTagCombinedAttr OnpingTagCombinedFields
 
 type OnpingTagCombinedTemplate = Rec (TemplatesFor Normalized Disjunction OnpingTagCombinedAttr) OnpingTagCombinedFields
 
+type OnpingTagCombinedValidation = Rec (Const Bool :: Symbol -> *) OnpingTagCombinedFields
 
 testOnpingTagCombined :: OnpingTagCombined
 testOnpingTagCombined = (OnpingTagCombinedAttr $ Just 4)

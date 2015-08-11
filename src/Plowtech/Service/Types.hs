@@ -40,6 +40,11 @@ newtype OnpingTagCombinedJSON = OnpingTagCombinedJSON { _onpingTagCombinedJSON :
 onpingTagCombinedJSON :: Iso' OnpingTagCombinedJSON OnpingTagCombined
 onpingTagCombinedJSON = iso _onpingTagCombinedJSON OnpingTagCombinedJSON
 
+newtype OnpingTagCombinedValidationJSON = OnpingTagCombinedValidationJSON { _onpingTagCombinedValidationJSON :: OnpingTagCombinedValidation }
+
+onpingTagCombinedValidationJSON :: Iso' OnpingTagCombinedValidationJSON OnpingTagCombinedValidation
+onpingTagCombinedValidationJSON = iso _onpingTagCombinedValidationJSON OnpingTagCombinedValidationJSON
+
 -- | Fields for the Named record
 type family NamedField a (field :: Symbol) where
   NamedField a "name" = Text
@@ -100,7 +105,7 @@ type OnpingTagCombinedValidatorAPI =
        "templates" :> Get '[JSON] [NamedJSON OnpingTagCombinedTemplateJSON]
   :<|> "templates" :> ReqBody '[JSON] (NamedJSON OnpingTagCombinedTemplateJSON) :> Post '[JSON] ()
   :<|> "templates" :> Capture "name" Text :> Get '[JSON] OnpingTagCombinedTemplateJSON
-  :<|> "validate"  :> Capture "name" Text :> ReqBody '[JSON] OnpingTagCombinedJSON :> Post '[JSON] Bool
+  :<|> "validate"  :> Capture "name" Text :> ReqBody '[JSON] OnpingTagCombinedJSON :> Post '[JSON] OnpingTagCombinedValidationJSON
   :<|>  Raw
 
 instance ToJSON OnpingTagCombinedJSON where
@@ -120,6 +125,12 @@ instance ToJSON OnpingTagCombinedTemplateJSON where
 
 instance FromJSON OnpingTagCombinedTemplateJSON where
   parseJSON = (OnpingTagCombinedTemplateJSON <$>) . recordFromJSON
+
+instance ToJSON OnpingTagCombinedValidationJSON where
+  toJSON = recordToJSON . _onpingTagCombinedValidationJSON
+
+instance FromJSON OnpingTagCombinedValidationJSON where
+  parseJSON = (OnpingTagCombinedValidationJSON <$>) . recordFromJSON
 
 instance (ToJSON (NamedField a field)) => ToJSON (NamedAttr a field) where
   toJSON = toJSON . _namedAttr
