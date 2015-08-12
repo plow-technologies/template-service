@@ -3,13 +3,13 @@
 A service to get, post, and validate location templates
 
 ## Dependencies
-* [master](https://github.com/plow-technologies/master) library
+* [golden-master](https://github.com/plow-technologies/golden-master) library
 
 ## Installation
 
 ```
 cabal sandbox init
-cabal sandbox add-source <path-to>/master
+cabal sandbox add-source <path-to>/golden-master
 cabal install
 ```
 
