@@ -1,6 +1,6 @@
-# prototype-2-service
+# template-service
 
-A service to get, post, and validate templates  templates
+A service to get, post, and validate location templates
 
 ## Dependencies
 * [master](https://github.com/plow-technologies/master) library
