@@ -11,7 +11,7 @@ import Control.Applicative
 import Control.Lens
 import Control.Monad.Trans.Either
 import Data.Aeson
-import Data.Master.Template (checkTemplates)
+import Data.Master.Template (checkTemplate)
 import Data.Maybe
 import Data.Proxy
 import Data.Text (Text)
@@ -64,7 +64,7 @@ validate templateStore templateName candidate = do
   template <- case mTemplate of
     Just template -> return $ template ^. (namedJSON . rlens (Proxy :: Proxy "record") . namedAttr)
     Nothing -> left err404
-  return $ checkTemplates (template ^. onpingTagCombinedTemplateJSON) (candidate ^. onpingTagCombinedJSON) ^. from onpingTagCombinedValidationJSON
+  return $ checkTemplate template candidate
   
 
 

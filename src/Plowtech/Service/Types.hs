@@ -40,6 +40,12 @@ newtype OnpingTagCombinedJSON = OnpingTagCombinedJSON { _onpingTagCombinedJSON :
 onpingTagCombinedJSON :: Iso' OnpingTagCombinedJSON OnpingTagCombined
 onpingTagCombinedJSON = iso _onpingTagCombinedJSON OnpingTagCombinedJSON
 
+instance Checkable OnpingTagCombinedJSON where
+  type Template OnpingTagCombinedJSON = OnpingTagCombinedTemplateJSON
+  type Result OnpingTagCombinedJSON = OnpingTagCombinedValidationJSON
+  checkTemplate template candidate = checkTemplate (template ^. onpingTagCombinedTemplateJSON) (candidate ^. onpingTagCombinedJSON) ^. from onpingTagCombinedValidationJSON
+  success _ = success (Proxy :: Proxy OnpingTagCombinedValidation) . (^. onpingTagCombinedValidationJSON)
+
 newtype OnpingTagCombinedValidationJSON = OnpingTagCombinedValidationJSON { _onpingTagCombinedValidationJSON :: OnpingTagCombinedValidation }
 
 onpingTagCombinedValidationJSON :: Iso' OnpingTagCombinedValidationJSON OnpingTagCombinedValidation
