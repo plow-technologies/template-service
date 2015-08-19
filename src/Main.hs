@@ -11,8 +11,9 @@ import Control.Applicative
 import Control.Lens
 import Control.Monad.Trans.Either
 import Data.Aeson
-import Data.Master.Template (checkTemplate)
+import Data.Master.Template (checkTemplate, Has(), MapCheckResult())
 import Data.Maybe
+import Data.Map (Map())
 import Data.Proxy
 import Data.Text (Text)
 import Data.Vinyl
@@ -27,7 +28,7 @@ import Plowtech.Service.Types
 import Control.Monad.IO.Class
 
 -- | The WAI application serving the API
-onpingTagCombinedValidator :: SimpleStore [NamedJSON OnpingTagCombinedTemplateJSON] -> Application
+onpingTagCombinedValidator :: SimpleStore [NamedJSON (Map Text (Has OnpingTagCombinedTemplateJSON))] -> Application
 onpingTagCombinedValidator store = 
   serve onpingTagCombinedValidatorAPI
         (getTemplates store :<|> postTemplate store :<|> getTemplate store :<|> validate store :<|> serveDirectory "static")
@@ -40,10 +41,10 @@ storeMToServant = bimapEitherT storeErrorToServantError id . EitherT . runStoreM
 retryLock :: StoreM stack (Either StoreError a) -> StoreM stack (Either StoreError a)
 retryLock action = action >>= either (\err -> case err of StoreLocked -> retryLock action; _ -> return $ Left err) (return . Right)
 
-getTemplates :: SimpleStore [NamedJSON OnpingTagCombinedTemplateJSON] -> EitherT ServantErr IO [NamedJSON OnpingTagCombinedTemplateJSON]
+getTemplates :: SimpleStore [NamedJSON (Map Text (Has OnpingTagCombinedTemplateJSON))] -> EitherT ServantErr IO [NamedJSON (Map Text (Has OnpingTagCombinedTemplateJSON))]
 getTemplates templateStore = storeMToServant $ withReadLock templateStore $ readSimpleStore StoreHere
 
-postTemplate :: SimpleStore [NamedJSON OnpingTagCombinedTemplateJSON] -> NamedJSON OnpingTagCombinedTemplateJSON -> EitherT ServantErr IO () 
+postTemplate :: SimpleStore [NamedJSON (Map Text (Has OnpingTagCombinedTemplateJSON))] -> NamedJSON (Map Text (Has OnpingTagCombinedTemplateJSON)) -> EitherT ServantErr IO () 
 postTemplate templateStore namedTemplateJSON = storeMToServant $ retryLock $ withWriteLock templateStore $ do 
   templates <- readSimpleStore StoreHere
   writeSimpleStore StoreHere $ namedTemplateJSON : templates
@@ -51,14 +52,14 @@ postTemplate templateStore namedTemplateJSON = storeMToServant $ retryLock $ wit
   checkpointSimpleStore StoreHere
   return ()
 
-getTemplate :: SimpleStore [NamedJSON OnpingTagCombinedTemplateJSON] -> Text -> EitherT ServantErr IO OnpingTagCombinedTemplateJSON 
+getTemplate :: SimpleStore [NamedJSON (Map Text (Has OnpingTagCombinedTemplateJSON))] -> Text -> EitherT ServantErr IO (Map Text (Has OnpingTagCombinedTemplateJSON))
 getTemplate templateStore templateName = do 
   mTemplate <- storeMToServant $ withReadLock templateStore $ fmap (listToMaybe . filter ((templateName ==) . (^. (namedJSON . rlens (Proxy :: Proxy "name") . namedAttr)))) $ readSimpleStore StoreHere
   case mTemplate of
     Just template -> return $ template ^. (namedJSON . rlens (Proxy :: Proxy "record") . namedAttr)
     Nothing -> left err404
  
-validate :: SimpleStore [NamedJSON OnpingTagCombinedTemplateJSON] -> Text -> OnpingTagCombinedJSON -> EitherT ServantErr IO OnpingTagCombinedValidationJSON
+validate :: SimpleStore [NamedJSON (Map Text (Has OnpingTagCombinedTemplateJSON))] -> Text -> Map Text OnpingTagCombinedJSON -> EitherT ServantErr IO (Map Text (MapCheckResult OnpingTagCombinedTemplateJSON OnpingTagCombinedJSON OnpingTagCombinedValidationJSON))
 validate templateStore templateName candidate = do
   mTemplate <- storeMToServant $ withReadLock templateStore $ fmap (listToMaybe . filter ((templateName ==) . (^. (namedJSON . rlens (Proxy :: Proxy "name") . namedAttr)))) $ readSimpleStore StoreHere
   template <- case mTemplate of

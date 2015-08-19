@@ -9,26 +9,27 @@
 {-# LANGUAGE TypeOperators #-}
 module Plowtech.Service.Types where
 
-import Control.Applicative
-import Control.Lens
-import Control.Lens.TH
-import Control.Monad (mzero)
-import Control.Monad.Trans.Either
-import Data.Aeson
-import Data.Master.Template (checkTemplates)
-import Data.Maybe
-import Data.Proxy
-import Data.Serialize hiding (encode, decode, Get)
-import Data.Text (Text)
-import Data.Vinyl
-import Data.Vinyl.Aeson
-import Data.Vinyl.Lens
-import Data.Vinyl.Functor (Const(..), Identity(..), Compose(..))
-import GHC.TypeLits
-import Plowtech.Records.OnpingTagCombined
-import Servant.API
-import Data.Vinyl.TypeLevel
-import Data.Master.Template
+import           Control.Applicative
+import           Control.Lens
+import           Control.Lens.TH
+import           Control.Monad (mzero)
+import           Control.Monad.Trans.Either
+import           Data.Aeson
+import           Data.Map (Map())
+import qualified Data.Map as Map
+import           Data.Maybe
+import           Data.Proxy
+import           Data.Serialize hiding (encode, decode, Get)
+import           Data.Text (Text)
+import           Data.Vinyl
+import           Data.Vinyl.Aeson
+import           Data.Vinyl.Lens
+import           Data.Vinyl.Functor (Const(..), Identity(..), Compose(..))
+import           GHC.TypeLits
+import           Plowtech.Records.OnpingTagCombined
+import           Servant.API
+import           Data.Vinyl.TypeLevel
+import           Data.Master.Template
 
 
 instance (Eq (f (g x))) => Eq (Compose f g x) where
@@ -105,13 +106,12 @@ eqReqOn :: (RElem r OnpingTagCombinedFields (RIndex r OnpingTagCombinedFields), 
     -> Rec (TemplatesFor Normalized Disjunction OnpingTagCombinedAttr) OnpingTagCombinedFields -> Bool
 eqReqOn rl template1 template2 = (getCompose $ template1 ^. (rlens rl)) == (getCompose $ template2 ^. (rlens rl))
 
-
 -- | The Servant API for validation
 type OnpingTagCombinedValidatorAPI =
-       "templates" :> Get '[JSON] [NamedJSON OnpingTagCombinedTemplateJSON]
-  :<|> "templates" :> ReqBody '[JSON] (NamedJSON OnpingTagCombinedTemplateJSON) :> Post '[JSON] ()
-  :<|> "templates" :> Capture "name" Text :> Get '[JSON] OnpingTagCombinedTemplateJSON
-  :<|> "validate"  :> Capture "name" Text :> ReqBody '[JSON] OnpingTagCombinedJSON :> Post '[JSON] OnpingTagCombinedValidationJSON
+       "templates" :> Get '[JSON] [NamedJSON (Map Text (Has OnpingTagCombinedTemplateJSON))]
+  :<|> "templates" :> ReqBody '[JSON] (NamedJSON (Map Text (Has OnpingTagCombinedTemplateJSON))) :> Post '[JSON] ()
+  :<|> "templates" :> Capture "name" Text :> Get '[JSON] (Map Text (Has OnpingTagCombinedTemplateJSON))
+  :<|> "validate"  :> Capture "name" Text :> ReqBody '[JSON] (Map Text OnpingTagCombinedJSON) :> Post '[JSON] (Map Text (MapCheckResult OnpingTagCombinedTemplateJSON OnpingTagCombinedJSON OnpingTagCombinedValidationJSON))
   :<|>  Raw
 
 instance ToJSON OnpingTagCombinedJSON where

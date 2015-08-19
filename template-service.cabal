@@ -28,6 +28,7 @@ Library
                       , cereal >= 0.4 && <0.5
                       , golden-master
                       , time
+                      , containers
 
 executable template-service
   Default-Language:     Haskell2010
@@ -51,6 +52,7 @@ executable template-service
                       , golden-master >= 0.2 && < 0.3
                       , transformers
                       , time
+                      , containers
 
 
 Test-Suite spec
