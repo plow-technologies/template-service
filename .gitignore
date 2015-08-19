@@ -15,4 +15,3 @@ cabal-dev
 *.chs.h
 .virthualenv
 .hsenv
-static/
