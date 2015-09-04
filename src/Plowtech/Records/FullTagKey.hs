@@ -149,10 +149,10 @@ diagonalizeText :: Integer -> Text
 diagonalizeText n = diagonalizeText' n
   where
     modulus = fromIntegral $ fromEnum (maxBound :: Char) + 1
-    diagonalizeText' 0 = "\0"
+    diagonalizeText' 0 = ""
     diagonalizeText' n = let char = toEnum $ fromIntegral $ n `mod` modulus
                              rest = n `div` modulus
-                         in T.cons char $ diagonalizeText' n
+                         in T.cons char $ diagonalizeText' rest
 
 undiagonalizeText :: Text -> Integer
 undiagonalizeText text = sum $

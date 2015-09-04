@@ -37,6 +37,9 @@ import           Data.Master.Examples (Generatable(..))
 instance (Eq (f (g x))) => Eq (Compose f g x) where
   (Compose a) == (Compose b) = a == b
 
+instance (Show (f (g x))) => Show (Compose f g x) where
+  show (Compose x) = show x
+
 instance (Bounded a) => Bounded (Maybe a) where
   minBound = Nothing
   maxBound = Just maxBound
@@ -64,6 +67,7 @@ fullTagKeyValidationJSON :: Iso' FullTagKeyValidation FullTagKeyValidationJSON
 fullTagKeyValidationJSON = iso FullTagKeyValidationJSON _fullTagKeyValidationJSON
 
 newtype FullTagKeyExamplesJSON = FullTagKeyExamplesJSON { _fullTagKeyExamplesJSON :: FullTagKeyExamples }
+deriving instance (RecAll (Compose [] FullTagKeyAttr) FullTagKeyFields Show) => Show FullTagKeyExamplesJSON
 
 fullTagKeyExamplesJSON :: Iso' FullTagKeyExamples FullTagKeyExamplesJSON
 fullTagKeyExamplesJSON = iso FullTagKeyExamplesJSON _fullTagKeyExamplesJSON
