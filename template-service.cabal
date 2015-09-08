@@ -1,5 +1,5 @@
 Name:                   template-service
-Version:                0.1.0
+Version:                0.2.0
 Author:                 Kevin Cotrone <kevincotrone@gmail.com>
 Maintainer:             Kevin Cotrone <kevincotrone@gmail.com>
 License:                BSD3
@@ -26,7 +26,7 @@ Library
                       , servant >= 0.4 && < 0.5
                       , either >= 4.4 && < 4.5
                       , cereal >= 0.4 && <0.5
-                      , golden-master
+                      , golden-master >= 0.3 && < 0.4
                       , time
                       , containers
 
@@ -49,7 +49,7 @@ executable template-service
                       , cereal >= 0.4 && <0.5
                       , simple-store >= 0.3.1 && < 0.4
                       , template-service
-                      , golden-master >= 0.2.1 && < 0.3
+                      , golden-master >= 0.3 && < 0.4
                       , transformers
                       , time
                       , containers

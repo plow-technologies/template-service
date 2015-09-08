@@ -12,6 +12,7 @@ module Plowtech.Records.FullTagKey where
 import Control.Applicative hiding (Const(..))
 import Control.Lens hiding ((.=), Const(..), Index(..))
 import Data.Aeson
+import Data.BigEnum
 import Data.Master.Template
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -32,9 +33,9 @@ instance MaybeComposite PCSerial where
   type HasComposite PCSerial = Just Char
   maybeComposite = CompositeJust (PCSerial . T.pack) (T.unpack . _pcSerial)
 
-instance Enum PCSerial where
-  toEnum = PCSerial . T.reverse . diagonalizeText . fromIntegral
-  fromEnum = fromInteger . undiagonalizeText . T.reverse . _pcSerial
+instance BigEnum PCSerial where
+  toBigEnum = PCSerial . T.reverse . diagonalizeText
+  fromBigEnum = undiagonalizeText . T.reverse . _pcSerial
 
 instance ToJSON PCSerial where
   toJSON (PCSerial serial) = toJSON serial
@@ -54,9 +55,9 @@ instance Ord TagName where
       EQ -> compare tag1 tag2
       comparison -> comparison
 
-instance Enum TagName where
-  toEnum = TagName . T.reverse . diagonalizeText . fromIntegral
-  fromEnum = fromInteger . undiagonalizeText . T.reverse . _tagName
+instance BigEnum TagName where
+  toBigEnum = TagName . T.reverse . diagonalizeText
+  fromBigEnum = undiagonalizeText . T.reverse . _tagName
 
 instance ToJSON TagName where
   toJSON (TagName name) = toJSON name
@@ -76,9 +77,9 @@ instance MaybeComposite Index where
   type HasComposite Index = Just Char
   maybeComposite = CompositeJust (Index . T.pack) (T.unpack . _index)
 
-instance Enum Index where
-  toEnum = Index . T.reverse . diagonalizeText . fromIntegral
-  fromEnum = fromInteger . undiagonalizeText . T.reverse . _index
+instance BigEnum Index where
+  toBigEnum = Index . T.reverse . diagonalizeText
+  fromBigEnum = undiagonalizeText . T.reverse . _index
 
 instance ToJSON Index where
   toJSON (Index index) = toJSON index
@@ -117,9 +118,9 @@ instance (MaybeComposite (FullTagKeyField attr)) => MaybeComposite (FullTagKeyAt
                      CompositeJust from to -> CompositeJust (FullTagKeyAttr . from) (to . _fullTagKeyAttr)
 
 
-instance (Enum (FullTagKeyField field)) => Enum (FullTagKeyAttr field) where
-  fromEnum = fromEnum . _fullTagKeyAttr
-  toEnum = FullTagKeyAttr . toEnum
+instance (BigEnum (FullTagKeyField field)) => BigEnum (FullTagKeyAttr field) where
+  fromBigEnum = fromBigEnum . _fullTagKeyAttr
+  toBigEnum = FullTagKeyAttr . toBigEnum
 
 instance (ToJSON (FullTagKeyField field)) => ToJSON (FullTagKeyAttr field) where
   toJSON = toJSON . _fullTagKeyAttr
